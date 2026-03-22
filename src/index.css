@@ -1,1 +1,168 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Resume Font (default) ────────────────────────────────── */
+/* StyleInjector overrides this at runtime; this is the fallback */
+.resume-serif {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* ─── Screen Preview Card ─────────────────────────────────── */
+.resume-container {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+/* ─── Page-Break Rules (screen + print) ──────────────────── */
+.resume-section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.resume-entry {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.resume-section>h2 {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* ─── @media print ───────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm !important;
+  }
+
+  .print-preview-wrapper {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  #resume-preview {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 15mm 18mm !important;
+    box-shadow: none !important;
+    transform: none !important;
+    border: none !important;
+    box-sizing: border-box !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  a {
+    text-decoration: none !important;
+  }
+
+  ul {
+    list-style: disc !important;
+  }
+}
+
+/* ─── Custom Range Slider ─────────────────────────────────── */
+/*
+  The slider track is split into two colours using a linear-gradient.
+  --pct is set as an inline style by RangeSlider.jsx and equals:
+    ((value - min) / (max - min)) * 100  %
+  This gives a live fill up to the thumb position without JavaScript
+  manipulating multiple DOM elements.
+*/
+.style-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(to right,
+      #3b82f6 var(--pct, 0%),
+      #e2e8f0 var(--pct, 0%));
+}
+
+/* Webkit thumb (Chrome, Safari, Edge) */
+.style-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2.5px solid #3b82f6;
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.25);
+  cursor: grab;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.style-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15);
+  transform: scale(1.15);
+}
+
+.style-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2);
+  transform: scale(1.2);
+}
+
+/* Firefox thumb */
+.style-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2.5px solid #3b82f6;
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.25);
+  cursor: grab;
+}
+
+/* ─── Scrollbar Hide ──────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Builder Tab Bar ─────────────────────────────────────── */
+.tab-active {
+  background: white;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.tab-inactive {
+  color: #94a3b8;
+}
+
+.tab-inactive:hover {
+  color: #475569;
+}
