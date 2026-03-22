@@ -4,7 +4,7 @@ const TextArea = ({ label, name, value, onChange, placeholder, rows = 4 }) => {
     <div className="mb-4">
       <label className="block text-xs font-semibold text-gray-600 uppercase mb-1 tracking-wide">
         {label}
-      }
+
       </label>
       <textarea
         name={name}

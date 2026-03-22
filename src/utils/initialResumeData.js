@@ -8,6 +8,11 @@ export const initialResumeData = {
     linkedin: "LinkedIn",
     portfolio: "Portfolio",
   },
+
+  // Optional professional summary (shown in resume only if styleConfig.showSummary is true)
+  summary:
+    "Results-driven Software Engineer with 2+ years of experience building scalable backend systems and full-stack web applications. Proficient in Java, Spring Boot, and React.js with a strong foundation in system design and distributed architectures.",
+
   experience: [
     {
       role: "Java Developer",
@@ -20,6 +25,7 @@ export const initialResumeData = {
       ],
     },
   ],
+
   projects: [
     {
       title: "Employee Management System",
@@ -31,6 +37,7 @@ export const initialResumeData = {
       ],
     },
   ],
+
   skills: {
     languages: "Java, JavaScript, Python, SQL",
     frameworks: "Spring Boot, React.js, Node.js, Kafka, RabbitMQ",
@@ -38,6 +45,7 @@ export const initialResumeData = {
     tools: "Git, Docker, GCP, AWS Lambda",
     specializations: "Data Structures, OOPs, RESTful APIs",
   },
+
   education: [
     {
       degree: "Bachelor of Technology in Computer Science",
@@ -46,6 +54,7 @@ export const initialResumeData = {
       score: "CGPA: 8.0/10.0",
     },
   ],
+
   achievements: [
     "Achieved an Expert rating with a score of 1815+ on Codeforces.",
     "Secured Rank 22 in GeeksforGeeks' Weekly Interview Series.",

@@ -1,92 +1,145 @@
 import { useLayoutEffect } from 'react';
 import { useStyle } from '../../context/StyleContext';
 
-/**
- * StyleInjector
- * ─────────────────────────────────────────────────────────────────────────────
- * Renders nothing to the DOM. Its only job is to sync the styleConfig state
- * into a dedicated <style id="resume-dynamic-styles"> tag in <head>.
- *
- * WHY THIS APPROACH AVOIDS RE-RENDERING ResumeTemplate:
- *   • ResumeTemplate does NOT consume StyleContext — it never re-renders when
- *     sliders move.
- *   • Only this tiny component re-renders on each style change.
- *   • It writes CSS rules that target #resume-preview by ID, overriding
- *     Tailwind classes via higher specificity + !important where needed.
- *   • The browser handles CSS recalculation natively — no React reconciliation
- *     happens inside the resume card at all.
- *
- * useLayoutEffect (vs useEffect):
- *   Runs synchronously after DOM mutations but BEFORE the browser paints,
- *   so there is zero flash of unstyled content even on first render.
- */
-
 const FONT_FAMILY_MAP = {
-    serif: '"Times New Roman", Times, serif',
-    lora: '"Lora", Georgia, serif',
-    sans: '"Inter", "Helvetica Neue", Arial, sans-serif',
-    mono: '"Courier New", Courier, monospace',
+  serif: '"Times New Roman", Times, serif',
+  lora: '"Lora", Georgia, serif',
+  sans: '"Inter", "Helvetica Neue", Arial, sans-serif',
+  mono: '"Courier New", Courier, monospace',
+};
+
+const PAPER_COLOR_MAP = {
+  white: '#ffffff',
+  warm: '#fafaf7',
+  cream: '#fdf8f0',
+};
+
+/**
+ * Generates the CSS for a section heading (h2) based on `headingStyle`.
+ *
+ * headingStyle options:
+ *   'underline' — classic thin rule below the text (original look)
+ *   'overline'  — bold rule ABOVE the text + more top spacing
+ *   'sidebar'   — a coloured left border + light background pill
+ *   'minimal'   — no rule, just slightly larger spaced-out caps
+ */
+const buildHeadingCSS = (headingStyle, linkColor, dividerThickness) => {
+  const weight = 'var(--resume-heading-weight, 700)';
+  const size = 'var(--resume-heading-size, 11px)';
+  const thick = `${dividerThickness}px`;
+
+  const base = `
+    #resume-preview .resume-section h2 {
+      font-size:      ${size} !important;
+      font-weight:    ${weight} !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.08em !important;
+      margin-bottom:  6px !important;
+  `;
+
+  switch (headingStyle) {
+    case 'overline':
+      return base + `
+        border-top:    ${thick} solid #1a1a1a !important;
+        border-bottom: none !important;
+        padding-top:   4px !important;
+        padding-bottom: 2px !important;
+        margin-top: 2px !important;
+      }`;
+
+    case 'sidebar':
+      return base + `
+        border-left:    3px solid ${linkColor} !important;
+        border-bottom:  none !important;
+        background:     ${linkColor}12 !important;
+        padding-left:   8px !important;
+        padding-top:    3px !important;
+        padding-bottom: 3px !important;
+        border-radius:  0 4px 4px 0 !important;
+        color: ${linkColor} !important;
+      }`;
+
+    case 'minimal':
+      return base + `
+        border-bottom:  none !important;
+        letter-spacing: 0.18em !important;
+        color: #6b7280 !important;
+      }`;
+
+    case 'underline':
+    default:
+      return base + `
+        border-bottom: ${thick}px solid #1a1a1a !important;
+        padding-bottom: 2px !important;
+      }`;
+  }
 };
 
 const StyleInjector = () => {
-    const { styleConfig } = useStyle();
+  const { styleConfig } = useStyle();
 
-    useLayoutEffect(() => {
-        // Lazily create the style tag on first run, reuse it on updates
-        let tag = document.getElementById('resume-dynamic-styles');
-        if (!tag) {
-            tag = document.createElement('style');
-            tag.id = 'resume-dynamic-styles';
-            document.head.appendChild(tag);
-        }
+  useLayoutEffect(() => {
+    let tag = document.getElementById('resume-dynamic-styles');
+    if (!tag) {
+      tag = document.createElement('style');
+      tag.id = 'resume-dynamic-styles';
+      document.head.appendChild(tag);
+    }
 
-        const ff = FONT_FAMILY_MAP[styleConfig.fontFamily] ?? FONT_FAMILY_MAP.serif;
-        const bold = styleConfig.boldHeaders ? '700' : '500';
+    const ff = FONT_FAMILY_MAP[styleConfig.fontFamily] ?? FONT_FAMILY_MAP.serif;
+    const bold = styleConfig.boldHeaders ? '700' : '500';
+    const paper = PAPER_COLOR_MAP[styleConfig.paperColor] ?? '#ffffff';
+    const gap = `${styleConfig.sectionSpacing}px`;
+    const thick = styleConfig.dividerThickness ?? 1;
 
-        /*
-         * All rules are scoped to #resume-preview so they never leak outside the
-         * resume card. The !important overrides Tailwind's utility classes which
-         * are already compiled into the stylesheet with lower insertion order.
-         */
-        tag.textContent = `
-      /* ── Base container ─────────────────────────────────── */
+    tag.textContent = `
+      /* ── Base container ──────────────────────────── */
       #resume-preview {
         font-size:   ${styleConfig.globalFontSize}px !important;
         font-family: ${ff} !important;
         line-height: ${styleConfig.lineHeight} !important;
+        background:  ${paper} !important;
+        --resume-font-size:     ${styleConfig.globalFontSize}px;
+        --resume-heading-size:  ${styleConfig.headingFontSize}px;
+        --resume-name-size:     ${styleConfig.nameSize}px;
+        --resume-line-height:   ${styleConfig.lineHeight};
+        --resume-link-color:    ${styleConfig.linkColor};
+        --resume-heading-weight:${bold};
       }
 
-      /* ── Name heading (h1) ───────────────────────────────── */
+      /* ── Name heading ────────────────────────────── */
       #resume-preview h1 {
         font-size: ${styleConfig.nameSize}px !important;
       }
 
-      /* ── Section headings (h2) ───────────────────────────── */
-      #resume-preview .resume-section h2 {
-        font-size:   ${styleConfig.headingFontSize}px !important;
-        font-weight: ${bold} !important;
+      /* ── Section spacing ─────────────────────────── */
+      #resume-preview .resume-section {
+        margin-bottom: ${gap} !important;
       }
 
-      /* ── Links / accent colour ───────────────────────────── */
+      /* ── Section headings (heading style variants) ─ */
+      ${buildHeadingCSS(styleConfig.headingStyle, styleConfig.linkColor, thick)}
+
+      /* ── Links / accent colour ───────────────────── */
       #resume-preview a {
         color: ${styleConfig.linkColor} !important;
       }
-
-      /* ── Italic subtitle text (company name, project tech) ─ */
       #resume-preview .text-blue-600 {
         color: ${styleConfig.linkColor} !important;
       }
+      #resume-preview .border-black {
+        border-color: #1a1a1a !important;
+      }
     `;
-    }, [styleConfig]);          // Re-runs only when styleConfig changes
+  }, [styleConfig]);
 
-    // Remove the injected tag cleanly when the component unmounts
-    useLayoutEffect(() => {
-        return () => {
-            document.getElementById('resume-dynamic-styles')?.remove();
-        };
-    }, []);
+  useLayoutEffect(() => {
+    return () => {
+      document.getElementById('resume-dynamic-styles')?.remove();
+    };
+  }, []);
 
-    return null;   // Renders nothing to the virtual DOM
+  return null;
 };
 
 export default StyleInjector;

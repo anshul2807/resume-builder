@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 
 // ── Form components (Content tab) ────────────────────────────────────────────
 import PersonalInfoForm from '../components/forms/PersonalInfoForm';
+import ProfessionalSummaryForm from '../components/forms/ProfessionalSummaryForm';
 import SummaryForm from '../components/forms/SummaryForm';
 import ExperienceForm from '../components/forms/ExperienceForm';
 import ProjectForm from '../components/forms/ProjectForm';
 import SkillsForm from '../components/forms/SkillsForm';
 import EducationForm from '../components/forms/EducationForm';
+
 
 // ── Preview + PDF ─────────────────────────────────────────────────────────────
 import ResumeTemplate from '../components/preview/ResumeTemplate';
@@ -134,6 +136,7 @@ const Builder = () => {
           <div className={activeTab === 'content' ? 'block' : 'hidden'}>
             <div className="space-y-8 pb-24">
               <PersonalInfoForm />
+              <ProfessionalSummaryForm />
               <SummaryForm />
               <ExperienceForm />
               <ProjectForm />
