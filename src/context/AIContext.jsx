@@ -13,7 +13,7 @@ export const AI_PROVIDERS = {
         models: [
             { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 3.1 Flash-Lite (Best for Star icon) ✨' },
             { id: 'gemini-2.0-flash', name: 'Gemini 3.1 Flash' },
-            { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 3.1 Pro' },
+            { id: 'gemini-1.5-pro', name: 'Gemini 3.1 Pro' },
         ],
         keyLink: 'https://aistudio.google.com/app/apikey',
         keyLinkLabel: 'aistudio.google.com → Get API key',
