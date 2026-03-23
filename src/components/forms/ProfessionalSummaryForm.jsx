@@ -1,14 +1,8 @@
 import React from 'react';
 import { useResume } from '../../context/ResumeContext';
 import { useStyle } from '../../context/StyleContext';
+import AIButton from '../ai/AIButton';
 
-/**
- * ProfessionalSummaryForm
- *
- * An optional form section for the professional summary paragraph.
- * Visibility in the left sidebar mirrors `showSummary` from StyleContext,
- * but can also be toggled directly from this form.
- */
 const ProfessionalSummaryForm = () => {
     const { resumeData, updateResumeData } = useResume();
     const { styleConfig, updateStyle } = useStyle();
@@ -16,7 +10,7 @@ const ProfessionalSummaryForm = () => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mt-6">
-            {/* Header row: title + show/hide toggle */}
+            {/* Header row */}
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-gray-800">Professional Summary</h3>
@@ -24,8 +18,7 @@ const ProfessionalSummaryForm = () => {
                         A short paragraph shown below your name in the resume.
                     </p>
                 </div>
-
-                {/* Toggle that mirrors the one in the Style sidebar */}
+                {/* Show/hide toggle */}
                 <button
                     onClick={() => updateStyle('showSummary', !styleConfig.showSummary)}
                     className={`
@@ -49,22 +42,28 @@ const ProfessionalSummaryForm = () => {
             <textarea
                 value={summary || ''}
                 onChange={(e) => updateResumeData('summary', e.target.value)}
-                placeholder="A concise 2–3 sentence summary of your professional background and key strengths..."
+                placeholder="A concise 2–3 sentence summary of your professional background and key strengths…"
                 rows={4}
-                className="
-          w-full p-3 border border-gray-200 rounded-lg text-sm leading-relaxed
-          focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none
-          transition-all resize-y shadow-sm text-gray-700 placeholder-gray-400
-        "
+                className="w-full p-3 border border-gray-200 rounded-lg text-sm leading-relaxed
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none
+                   transition-all resize-y shadow-sm text-gray-700 placeholder-gray-400"
             />
 
-            {/* Hint */}
-            {!styleConfig.showSummary && (
-                <p className="mt-2 text-[11px] text-amber-500 flex items-center gap-1">
-                    <span>⚠️</span>
-                    Summary is hidden. Toggle the switch above to show it in the resume.
-                </p>
-            )}
+            {/* AI pill + hidden warning */}
+            <div className="flex items-center justify-between mt-2">
+                {!styleConfig.showSummary ? (
+                    <p className="text-[11px] text-amber-500 flex items-center gap-1">
+                        <span>⚠️</span> Summary is hidden — toggle above to show it.
+                    </p>
+                ) : <span />}
+
+                <AIButton
+                    size="md"
+                    value={summary}
+                    context="summary"
+                    onReplace={(improved) => updateResumeData('summary', improved)}
+                />
+            </div>
         </div>
     );
 };

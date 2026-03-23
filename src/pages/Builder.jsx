@@ -18,6 +18,9 @@ import usePdfDownload from '../hooks/usePdfDownload';
 import StyleSidebar from '../components/style/StyleSidebar';
 import StyleInjector from '../components/style/StyleInjector';
 
+// ── AI system ─────────────────────────────────────────────────────────────────
+import AISettingsPanel from '../components/ai/AISettingsPanel';
+
 /**
  * Builder — main page
  *
@@ -43,6 +46,7 @@ import StyleInjector from '../components/style/StyleInjector';
 const TABS = [
   { id: 'content', label: 'Content', emoji: '✏️' },
   { id: 'style', label: 'Style', emoji: '🎨' },
+  { id: 'ai', label: 'AI', emoji: '✦' },
 ];
 
 const Builder = () => {
@@ -119,7 +123,12 @@ const Builder = () => {
                   flex-1 flex items-center justify-center gap-1.5
                   py-2 px-3 rounded-lg text-sm font-semibold
                   transition-all duration-200
-                  ${activeTab === tab.id ? 'tab-active' : 'tab-inactive'}
+                  ${activeTab === tab.id
+                    ? tab.id === 'ai'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : 'tab-active'
+                    : 'tab-inactive'
+                  }
                 `}
               >
                 <span>{tab.emoji}</span>
@@ -147,12 +156,12 @@ const Builder = () => {
 
           {/* STYLE TAB ── granular visual controls */}
           <div className={activeTab === 'style' ? 'block' : 'hidden'}>
-            {/*
-              StyleSidebar calls updateStyle() from StyleContext.
-              Those updates flow to StyleInjector which writes CSS to a
-              <style> tag — ResumeTemplate NEVER re-renders.
-            */}
             <StyleSidebar />
+          </div>
+
+          {/* AI TAB ── provider config + API key */}
+          <div className={activeTab === 'ai' ? 'block' : 'hidden'}>
+            <AISettingsPanel />
           </div>
 
         </div>
