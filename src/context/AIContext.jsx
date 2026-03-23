@@ -11,6 +11,7 @@ export const AI_PROVIDERS = {
         badge: 'Free tier available',
         badgeColor: 'emerald',
         models: [
+            { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Most Stable Free Tier) ✅' },
             { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 3.1 Flash-Lite (Best for Star icon) ✨' },
             { id: 'gemini-2.0-flash', name: 'Gemini 3.1 Flash' },
             { id: 'gemini-1.5-pro', name: 'Gemini 3.1 Pro' },
