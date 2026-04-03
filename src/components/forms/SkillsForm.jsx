@@ -11,7 +11,7 @@ const SKILL_FIELDS = [
   { name: 'specializations', label: 'Specializations', placeholder: 'e.g. System Design, DSA' },
 ];
 
-const SkillsForm = () => {
+const SkillsForm = ({ onAuthClick }) => {
   const { resumeData, updateResumeData } = useResume();
   const { skills } = resumeData;
 
@@ -49,11 +49,12 @@ const SkillsForm = () => {
             </div>
             {/* ✦ AI star per skill row */}
             <div className="mb-3">
-              <AIButton
+            <AIButton
                 size="sm"
                 value={skills[name]}
                 context="skills"
                 onReplace={(improved) => handleReplace(name, improved)}
+                onAuthClick={onAuthClick}
               />
             </div>
           </div>

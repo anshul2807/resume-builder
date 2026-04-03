@@ -1,46 +1,22 @@
-import React, { useState } from 'react';
-import { useAI, AI_PROVIDERS } from '../../context/AIContext';
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 
-const BADGE_COLORS = {
-    emerald: 'bg-emerald-100 text-emerald-700',
-    teal: 'bg-teal-100 text-teal-700',
-    amber: 'bg-amber-100 text-amber-700',
-};
+/**
+ * AISettingsPanel — replaces the old provider/API-key panel.
+ *
+ * For logged-in users: shows account info, daily Enhance usage, logout.
+ * For guests: explains what they're missing and prompts login.
+ *
+ * Props:
+ *  onOpenAuth — callback(tab) — opens the AuthModal with 'login' or 'signup'
+ */
+const AISettingsPanel = ({ onOpenAuth }) => {
+    const {
+        isLoggedIn, user, logout,
+        enhanceUsageToday, enhanceLimitReached, DAILY_ENHANCE_LIMIT,
+    } = useAuth();
 
-/* Inline monochrome provider logos (SVG paths) */
-const ProviderIcon = ({ id, size = 20 }) => {
-    if (id === 'gemini') return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C6.8 7.2 6.8 16.8 12 22c5.2-5.2 5.2-14.8 0-20Z" fill="currentColor" opacity=".9" />
-            <path d="M2 12c5.2-5.2 14.8-5.2 20 0-5.2 5.2-14.8 5.2-20 0Z" fill="currentColor" opacity=".5" />
-        </svg>
-    );
-    if (id === 'openai') return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.985 5.985 0 0 0 .51 4.911 6.046 6.046 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.046 6.046 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.046 6.046 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.677l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.845-3.374L15.112 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.4-.667zm2.010-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z" />
-        </svg>
-    );
-    // Claude — abstract hexagonal icon
-    return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.24L20 8.5v7L12 19.76 4 15.5v-7L12 4.24z" />
-            <circle cx="12" cy="12" r="3" />
-        </svg>
-    );
-};
-
-const AISettingsPanel = () => {
-    const { aiConfig, updateAIConfig } = useAI();
-    const [showKey, setShowKey] = useState(false);
-
-    const currentProvider = AI_PROVIDERS[aiConfig.provider];
-
-    const handleProviderSelect = (pid) => {
-        updateAIConfig({
-            provider: pid,
-            model: AI_PROVIDERS[pid].models[0].id,
-        });
-    };
+    const usagePct = Math.min((enhanceUsageToday / DAILY_ENHANCE_LIMIT) * 100, 100);
 
     return (
         <div className="pb-24 space-y-6">
@@ -50,170 +26,179 @@ const AISettingsPanel = () => {
                 <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
+                        {/* Gemini icon */}
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+                            <path d="M12 2C6.8 7.2 6.8 16.8 12 22c5.2-5.2 5.2-14.8 0-20Z" opacity=".9" />
+                            <path d="M2 12c5.2-5.2 14.8-5.2 20 0-5.2 5.2-14.8 5.2-20 0Z" opacity=".5" />
                         </svg>
                         <span className="font-black text-sm tracking-wide">AI Resume Enhancement</span>
                     </div>
                     <p className="text-[11px] leading-snug text-white/80">
-                        Click the <strong className="text-white">★ star button</strong> beside any field to
-                        instantly rewrite it using AI. Add your API key below to get started — it's stored
-                        only in your browser.
+                        Powered by <strong className="text-white">Google Gemini</strong>.
+                        Click the <strong className="text-white">✦ star button</strong> beside any field to
+                        instantly fix grammar, complete sentences, and polish your text—without changing your word count.
                     </p>
                 </div>
             </div>
 
-            {/* Provider selection */}
-            <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">
-                    AI Provider
-                </p>
-                <div className="space-y-2">
-                    {Object.values(AI_PROVIDERS).map((p) => {
-                        const isSelected = aiConfig.provider === p.id;
-                        return (
-                            <button
-                                key={p.id}
-                                onClick={() => handleProviderSelect(p.id)}
-                                className={`
-                  w-full flex items-start gap-3 p-3.5 rounded-xl border-2 text-left
-                  transition-all duration-150
-                  ${isSelected
-                                        ? 'border-violet-500 bg-violet-50'
-                                        : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'
-                                    }
-                `}
-                            >
-                                <span className={`mt-0.5 flex-shrink-0 ${isSelected ? 'text-violet-600' : 'text-slate-400'}`}>
-                                    <ProviderIcon id={p.id} size={20} />
-                                </span>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                        <p className={`text-sm font-bold ${isSelected ? 'text-violet-700' : 'text-slate-700'}`}>
-                                            {p.name}
-                                        </p>
-                                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${BADGE_COLORS[p.badgeColor]}`}>
-                                            {p.badge}
-                                        </span>
-                                    </div>
-                                    <p className="text-[11px] text-slate-400">
-                                        {p.models.map((m) => m.name).join(' · ')}
-                                    </p>
-                                    {p.corsNote && (
-                                        <p className="text-[10px] text-amber-600 mt-1 leading-snug">
-                                            ⚠️ {p.corsNote}
-                                        </p>
-                                    )}
-                                </div>
-                                {isSelected && (
-                                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center mt-0.5">
-                                        <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2 5l2 2 4-4" />
-                                        </svg>
-                                    </div>
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Model selector */}
-            <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2">
-                    Model
-                </label>
-                <select
-                    value={aiConfig.model}
-                    onChange={(e) => updateAIConfig({ model: e.target.value })}
-                    className="w-full p-2.5 border-2 border-slate-100 rounded-xl text-sm font-medium
-                     text-slate-700 bg-white outline-none focus:ring-2 focus:ring-violet-500
-                     focus:border-transparent cursor-pointer transition-all"
-                >
-                    {currentProvider.models.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* API Key input */}
-            <div>
-                <div className="flex items-center justify-between mb-2">
-                    <label className="block text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-                        API Key
-                    </label>
-                    <a
-                        href={currentProvider.keyLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-violet-500 hover:text-violet-700 hover:underline transition-colors"
-                    >
-                        Get key →
-                    </a>
-                </div>
-                <div className="relative">
-                    <input
-                        type={showKey ? 'text' : 'password'}
-                        value={aiConfig.apiKey}
-                        onChange={(e) => updateAIConfig({ apiKey: e.target.value })}
-                        placeholder={`Paste your ${currentProvider.name} API key…`}
-                        className="w-full p-3 pr-10 border-2 border-slate-200 rounded-xl text-sm font-mono
-                       focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none
-                       transition-all placeholder-slate-300"
-                    />
-                    <button
-                        onClick={() => setShowKey(!showKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                        title={showKey ? 'Hide key' : 'Show key'}
-                    >
-                        {showKey ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            {isLoggedIn ? (
+                /* ── LOGGED-IN STATE ─────────────────────────────────────────── */
+                <>
+                    {/* User card */}
+                    <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500
+                                        flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                            {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            {user?.name && (
+                                <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
+                            )}
+                            <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
+                        </div>
+                        <button
+                            onClick={logout}
+                            className="flex-shrink-0 text-[11px] text-slate-400 hover:text-red-500
+                                       font-semibold transition-colors flex items-center gap-1"
+                        >
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                                <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
                             </svg>
+                            Log out
+                        </button>
+                    </div>
+
+                    {/* Daily usage meter */}
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+                                Daily AI Enhances
+                            </p>
+                            <span className={`text-[11px] font-bold ${enhanceLimitReached ? 'text-red-500' : 'text-slate-600'}`}>
+                                {enhanceUsageToday} / {DAILY_ENHANCE_LIMIT}
+                            </span>
+                        </div>
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full rounded-full transition-all duration-500
+                                    ${enhanceLimitReached
+                                        ? 'bg-red-400'
+                                        : usagePct > 70
+                                            ? 'bg-amber-400'
+                                            : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
+                                style={{ width: `${usagePct}%` }}
+                            />
+                        </div>
+                        {enhanceLimitReached ? (
+                            <p className="text-[10px] text-red-500 mt-1.5 font-semibold">
+                                Daily limit reached — resets at midnight.
+                            </p>
                         ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                            <p className="text-[10px] text-slate-400 mt-1.5">
+                                Resets daily at midnight. Limit: {DAILY_ENHANCE_LIMIT} enhancements/day.
+                            </p>
                         )}
-                    </button>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                    🔒 Stored <strong>only in your browser</strong> (localStorage). Never sent anywhere except
-                    directly to {currentProvider.name}'s API.
-                </p>
-            </div>
+                    </div>
 
-            {/* Key link helper */}
-            <div className="bg-slate-50 rounded-xl p-4">
-                <p className="text-[11px] font-bold text-slate-600 mb-1.5">Where to get your key:</p>
-                <a
-                    href={currentProvider.keyLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-violet-600 hover:underline flex items-center gap-1"
-                >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                    </svg>
-                    {currentProvider.keyLinkLabel}
-                </a>
-            </div>
+                    {/* Status badge */}
+                    <div className="flex items-center gap-2 text-[11px] text-emerald-700 font-semibold
+                                    bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        AI Enhancement active — click any ✦ star button
+                    </div>
 
-            {/* Status badge */}
-            {aiConfig.apiKey ? (
-                <div className="flex items-center gap-2 text-[11px] text-emerald-700 font-semibold
-                        bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    API key saved — ✦ star buttons are active!
-                </div>
+                    {/* What AI does info box */}
+                    <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 space-y-2">
+                        <p className="text-[11px] font-bold text-violet-700 mb-2">What AI Enhance does:</p>
+                        {[
+                            '✅  Corrects all grammatical errors',
+                            '✅  Completes fragmented sentences',
+                            '✅  Preserves your original word count',
+                        ].map((item) => (
+                            <p key={item} className="text-[11px] text-violet-600 leading-snug">{item}</p>
+                        ))}
+                    </div>
+
+                    {/* Resume saved badge */}
+                    <div className="flex items-center gap-2 text-[11px] text-blue-700 font-semibold
+                                    bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5">
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 flex-shrink-0">
+                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                        </svg>
+                        Your resume is saved to your account
+                    </div>
+                </>
             ) : (
-                <div className="flex items-center gap-2 text-[11px] text-amber-600 font-semibold
-                        bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    Add an API key to enable AI enhancement.
-                </div>
+                /* ── GUEST STATE ─────────────────────────────────────────────── */
+                <>
+                    {/* Lock callout */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                        <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-600">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-amber-800 mb-1">AI Enhance requires login</p>
+                                <p className="text-[11px] text-amber-700 leading-relaxed">
+                                    Create a free account to unlock AI-powered text enhancement.
+                                    You get <strong>{DAILY_ENHANCE_LIMIT} enhancements per day</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* What you get */}
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-3">
+                            What you unlock
+                        </p>
+                        <div className="space-y-2.5">
+                            {[
+                                { icon: '✦', label: 'AI-powered text enhancement', color: 'text-violet-500' },
+                                { icon: '✅', label: 'Grammar & sentence correction', color: 'text-emerald-500' },
+                                { icon: '💾', label: 'Resume saved to your account', color: 'text-blue-500' },
+                                { icon: '🔒', label: 'Your data is private & secure', color: 'text-slate-500' },
+                            ].map(({ icon, label, color }) => (
+                                <div key={label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                    <span className={`text-base ${color}`}>{icon}</span>
+                                    <p className="text-[12px] font-semibold text-slate-700">{label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* CTA buttons */}
+                    <div className="space-y-2.5 pt-1">
+                        <button
+                            id="auth-signup-btn"
+                            onClick={() => onOpenAuth?.('signup')}
+                            className="w-full py-3.5 rounded-xl font-bold text-sm text-white
+                                       bg-gradient-to-r from-blue-600 to-violet-600
+                                       hover:opacity-90 active:scale-[0.98] shadow-md shadow-blue-200
+                                       transition-all duration-200"
+                        >
+                            Create Free Account
+                        </button>
+                        <button
+                            id="auth-login-btn"
+                            onClick={() => onOpenAuth?.('login')}
+                            className="w-full py-3 rounded-xl font-bold text-sm text-slate-600
+                                       border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50
+                                       transition-all duration-200"
+                        >
+                            Log In
+                        </button>
+                    </div>
+
+                    {/* Guest note */}
+                    <p className="text-center text-[10px] text-slate-400 leading-relaxed">
+                        You can still build your resume as a guest.
+                        Your data is saved in this browser only.
+                    </p>
+                </>
             )}
         </div>
     );

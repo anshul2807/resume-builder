@@ -7,7 +7,7 @@ import AIButton from '../ai/AIButton';
  * One textarea where each line becomes a bullet point in the resume.
  * An AI pill button processes the entire textarea content at once.
  */
-const SummaryForm = () => {
+const SummaryForm = ({ onAuthClick }) => {
   const { resumeData, updateResumeData } = useResume();
   const { achievements } = resumeData;
 
@@ -46,6 +46,7 @@ const SummaryForm = () => {
           onReplace={(improved) =>
             updateResumeData('achievements', improved.split('\n').filter(Boolean))
           }
+          onAuthClick={onAuthClick}
         />
       </div>
     </div>

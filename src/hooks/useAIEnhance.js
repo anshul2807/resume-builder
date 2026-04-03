@@ -1,110 +1,65 @@
-import { useAI } from '../context/AIContext';
+import { useAuth } from '../context/AuthContext';
+import { BASE_URL } from '../config/api';
 
 /**
  * Context-aware resume writing prompts.
- * Each prompt instructs the model to return ONLY the improved text so we can
- * inject the result directly into the form field without any post-processing.
+ *
+ * Each prompt instructs Gemini to do exactly three things:
+ *  1. Correct all grammatical errors.
+ *  2. Complete any fragmented or incomplete sentences.
+ *  3. Strictly maintain a word count roughly equal to the original input.
+ *
+ * All requests are routed through the backend (/api/ai/enhance).
+ * The Gemini API key lives only on the server — never in the browser.
  */
 const PROMPTS = {
     summary:
-        'You are an expert resume writer. Improve the following professional summary to be compelling, specific, and ATS-friendly. Keep it 2–3 concise sentences. Return ONLY the improved text, no preamble:',
+        'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT add unnecessary content or make the text longer. Return ONLY the corrected text with no preamble:',
 
     'experience-point':
-        'You are an expert resume writer. Rewrite this work experience bullet point using a strong action verb. Make it more impactful and add quantifiable achievements where possible. Return ONLY the improved bullet, no preamble:',
+        'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT expand or add new achievements. Return ONLY the corrected bullet with no preamble:',
 
     'project-point':
-        'You are an expert resume writer. Improve this project description bullet point to clearly highlight technical impact and skills used. Return ONLY the improved bullet, no preamble:',
+        'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT expand or add new details. Return ONLY the corrected bullet with no preamble:',
 
     achievement:
-        'You are an expert resume writer. Improve this achievement line to be more specific, impressive, and concise. Return ONLY the improved text, no preamble:',
+        'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Return ONLY the corrected text with no preamble:',
 
     skills:
-        'You are an expert resume writer. Format and improve these technical skills for a modern resume. Return ONLY a clean comma-separated list, no preamble:',
+        'You are an expert resume writer. Fix any formatting or grammatical issues in these technical skills. Keep the comma-separated list format and do NOT add new skills. Return ONLY the corrected list with no preamble:',
 
     generic:
-        'You are an expert resume writer. Improve the following text for use in a professional resume. Return ONLY the improved text, no preamble:',
-};
-
-// ─── Provider-specific API callers ──────────────────────────────────────────
-
-const callGemini = async (apiKey, model, prompt) => {
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
-        }),
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `Gemini API error (${res.status})`);
-    }
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-};
-
-const callOpenAI = async (apiKey, model, prompt) => {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-            model,
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 512,
-            temperature: 0.7,
-        }),
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `OpenAI API error (${res.status})`);
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content?.trim() ?? '';
-};
-
-const callClaude = async (apiKey, model, prompt) => {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-            model,
-            max_tokens: 512,
-            messages: [{ role: 'user', content: prompt }],
-        }),
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `Claude API error (${res.status})`);
-    }
-    const data = await res.json();
-    return data.content?.[0]?.text?.trim() ?? '';
+        'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Return ONLY the corrected text with no preamble:',
 };
 
 // ─── Main hook ───────────────────────────────────────────────────────────────
 /**
  * Returns an `enhance(text, context)` function.
+ * - Requires the user to be logged in (throws otherwise).
+ * - Enforces the daily rate limit (backend is the source of truth).
+ * - Routes all Gemini calls through POST /api/ai/enhance.
  *
  * @param {string} text     - Current field value to improve
  * @param {string} context  - One of: 'summary' | 'experience-point' |
  *                            'project-point' | 'achievement' | 'skills' | 'generic'
- * @returns {Promise<string>} The improved text from the AI
+ * @returns {Promise<string>} The improved text from Gemini
  */
 const useAIEnhance = () => {
-    const { aiConfig } = useAI();
+    const { isLoggedIn, token, enhanceLimitReached, incrementEnhanceUsage, DAILY_ENHANCE_LIMIT } = useAuth();
 
     const enhance = async (text, context = 'generic') => {
-        if (!aiConfig.apiKey?.trim()) {
-            throw new Error('No API key — add yours in the ✨ AI tab first.');
+        // ── Auth gate ──────────────────────────────────────────────────────
+        if (!isLoggedIn) {
+            throw new Error('Please log in to use AI Enhancement.');
         }
+
+        // ── Rate limit gate ────────────────────────────────────────────────
+        if (enhanceLimitReached) {
+            throw new Error(
+                `You've reached your daily limit of ${DAILY_ENHANCE_LIMIT} AI enhancements. Come back tomorrow!`
+            );
+        }
+
         if (!text?.trim()) {
             throw new Error('Nothing to enhance. Write some content first.');
         }
@@ -112,12 +67,28 @@ const useAIEnhance = () => {
         const systemPrompt = PROMPTS[context] ?? PROMPTS.generic;
         const fullPrompt = `${systemPrompt}\n\n"${text.trim()}"`;
 
-        switch (aiConfig.provider) {
-            case 'gemini': return callGemini(aiConfig.apiKey, aiConfig.model, fullPrompt);
-            case 'openai': return callOpenAI(aiConfig.apiKey, aiConfig.model, fullPrompt);
-            case 'claude': return callClaude(aiConfig.apiKey, aiConfig.model, fullPrompt);
-            default: throw new Error(`Unknown provider: ${aiConfig.provider}`);
+        // ── Backend call — Gemini key never leaves the server ──────────────
+        const res = await fetch(`${BASE_URL}/api/ai/enhance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ prompt: fullPrompt, context }),
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err?.message || `AI request failed (${res.status})`);
         }
+
+        const data = await res.json();
+        const result = data?.result?.trim() ?? '';
+
+        // Increment local counter + refresh from backend
+        if (result) incrementEnhanceUsage();
+
+        return result;
     };
 
     return enhance;

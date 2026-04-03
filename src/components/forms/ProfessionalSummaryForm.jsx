@@ -3,7 +3,7 @@ import { useResume } from '../../context/ResumeContext';
 import { useStyle } from '../../context/StyleContext';
 import AIButton from '../ai/AIButton';
 
-const ProfessionalSummaryForm = () => {
+const ProfessionalSummaryForm = ({ onAuthClick }) => {
     const { resumeData, updateResumeData } = useResume();
     const { styleConfig, updateStyle } = useStyle();
     const { summary } = resumeData;
@@ -62,6 +62,7 @@ const ProfessionalSummaryForm = () => {
                     value={summary}
                     context="summary"
                     onReplace={(improved) => updateResumeData('summary', improved)}
+                    onAuthClick={onAuthClick}
                 />
             </div>
         </div>

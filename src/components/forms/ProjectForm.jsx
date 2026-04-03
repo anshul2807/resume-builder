@@ -3,7 +3,7 @@ import { useResume } from '../../context/ResumeContext';
 import Input from '../common/Input';
 import AIButton from '../ai/AIButton';
 
-const ProjectForm = () => {
+const ProjectForm = ({ onAuthClick }) => {
   const { resumeData, updateResumeData } = useResume();
   const { projects } = resumeData;
 
@@ -84,6 +84,7 @@ const ProjectForm = () => {
                   value={point}
                   context="project-point"
                   onReplace={(improved) => handlePointChange(index, pIndex, improved)}
+                  onAuthClick={onAuthClick}
                 />
                 {/* Remove bullet */}
                 <button

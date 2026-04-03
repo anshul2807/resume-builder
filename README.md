@@ -1,4 +1,4 @@
-# 📄 RESUME.io — React Resume Builder
+# 📄 Draft2paper — React Resume Builder
 
 A feature-rich, browser-based resume builder built with **React 19** and **Tailwind CSS v4**. Edit your resume content in real-time, customize every visual detail through a live styling sidebar, drag sections into any order, and download a pixel-perfect PDF in one click.
 
@@ -70,8 +70,8 @@ Drag any section (Achievements, Work Experience, Projects, Skills, Education, Su
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/anshul2807/resume-builder.git
-cd resume-builder
+git clone https://github.com/anshul2807/draft2paper.git
+cd draft2paper
 
 # 2. Install dependencies
 npm install
@@ -96,7 +96,7 @@ npm run lint     # Run ESLint
 ## 🗂 Project Structure
 
 ```
-resume-builder/
+draft2paper/
 ├── index.html                      # Entry HTML (Google Fonts loaded here)
 ├── vite.config.js
 ├── package.json
