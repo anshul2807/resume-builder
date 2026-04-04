@@ -167,6 +167,308 @@
   color: #475569;
 }
 
+/* ─── Resume Manager ─────────────────────────────────────── */
+.rm-container {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.rm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.rm-header:hover {
+  background: #f1f5f9;
+}
+
+.rm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rm-header-icon {
+  width: 16px;
+  height: 16px;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.rm-header-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: -0.01em;
+}
+
+.rm-header-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6366f1;
+  background: #eef2ff;
+  border-radius: 6px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.rm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rm-new-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+}
+
+.rm-new-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.rm-new-btn:active {
+  transform: scale(0.96);
+}
+
+.rm-collapse-icon {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.rm-collapse-icon.rm-collapsed {
+  transform: rotate(-90deg);
+}
+
+/* ── Resume list ─────────────────────────────────────────── */
+.rm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 8px 8px;
+  animation: rm-slide-in 0.2s ease-out;
+}
+
+/* ── Individual resume card ──────────────────────────────── */
+.rm-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: #fff;
+  border: 1.5px solid transparent;
+}
+
+.rm-card:hover:not(.rm-card-active) {
+  background: #f0f4ff;
+  border-color: #c7d2fe;
+}
+
+.rm-card-active {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  cursor: default;
+}
+
+.rm-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #cbd5e1;
+  transition: all 0.15s ease;
+}
+
+.rm-dot-active {
+  background: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.rm-dot-new {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.rm-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rm-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rm-card-subtitle {
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 1px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rm-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.rm-active-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: #6366f1;
+  background: #e0e7ff;
+  border-radius: 6px;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rm-badge-new {
+  color: #d97706;
+  background: #fef3c7;
+}
+
+.rm-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rm-delete-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ── Delete confirmation ─────────────────────────────────── */
+.rm-confirm {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  animation: rm-pop-in 0.15s ease-out;
+}
+
+.rm-confirm-yes,
+.rm-confirm-no {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.rm-confirm-yes {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.rm-confirm-yes:hover {
+  background: #bbf7d0;
+}
+
+.rm-confirm-no {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.rm-confirm-no:hover {
+  background: #fecaca;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.rm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.rm-empty-icon {
+  width: 28px;
+  height: 28px;
+  color: #cbd5e1;
+  margin-bottom: 2px;
+}
+
+.rm-empty p {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0;
+}
+
+.rm-empty span {
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* ── New resume indicator ────────────────────────────────── */
+.rm-card-new {
+  border-style: dashed;
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+@keyframes rm-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rm-pop-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 /* ─── ATS Score Modal ────────────────────────────────────── */
 .ats-modal-overlay {
   position: fixed;

@@ -54,7 +54,7 @@ export const StyleProvider = ({ children }) => {
     const resetStyles = () => setStyleConfig(defaultStyleConfig);
 
     return (
-        <StyleContext.Provider value={{ styleConfig, updateStyle, reorderSections, resetStyles }}>
+        <StyleContext.Provider value={{ styleConfig, setStyleConfig, updateStyle, reorderSections, resetStyles }}>
             {children}
         </StyleContext.Provider>
     );

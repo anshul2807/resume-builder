@@ -14,10 +14,17 @@ const SyncStatusBadge = ({ status }) => {
             bg: 'bg-blue-50 border-blue-100',
             text: 'text-blue-600',
             dot: 'bg-blue-400 animate-pulse',
-            label: 'Loading resume…',
+            label: 'Loading…',
             spin: true,
         },
         syncing: {
+            bg: 'bg-amber-50 border-amber-100',
+            text: 'text-amber-600',
+            dot: 'bg-amber-400 animate-pulse',
+            label: 'Saving…',
+            spin: true,
+        },
+        saving: {
             bg: 'bg-amber-50 border-amber-100',
             text: 'text-amber-600',
             dot: 'bg-amber-400 animate-pulse',

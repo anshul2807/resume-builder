@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // ── Form components (Content tab) ────────────────────────────────────────────
 import PersonalInfoForm from '../components/forms/PersonalInfoForm';
@@ -16,6 +16,8 @@ import usePdfDownload from '../hooks/usePdfDownload';
 // ── Style system ──────────────────────────────────────────────────────────────
 import StyleSidebar from '../components/style/StyleSidebar';
 import StyleInjector from '../components/style/StyleInjector';
+import { useStyle } from '../context/StyleContext';
+import { defaultStyleConfig } from '../context/StyleContext';
 
 // ── AI system ─────────────────────────────────────────────────────────────────
 import AISettingsPanel from '../components/ai/AISettingsPanel';
@@ -30,6 +32,9 @@ import { useResume } from '../context/ResumeContext';
 
 // ── Admin panel ───────────────────────────────────────────────────────────────
 import AdminPanel from '../components/admin/AdminPanel';
+
+// ── Resume manager (multi-resume) ─────────────────────────────────────────────
+import ResumeManager from '../components/common/ResumeManager';
 
 const BASE_TABS = [
   { id: 'content', label: 'Content', emoji: '✏️' },
@@ -48,7 +53,34 @@ const Builder = () => {
   const [authModalTab, setAuthModalTab] = useState('login');
 
   const { isLoggedIn, user, logout, isAdmin } = useAuth();
-  const { syncStatus } = useResume();
+  const { syncStatus, saveResume, hasUnsavedChanges, selectResume, getResumeStyles, currentResumeId } = useResume();
+  const { styleConfig, setStyleConfig } = useStyle();
+
+  /** Save handler — passes current styles along with resume data */
+  const handleSave = () => {
+    if (!isLoggedIn) return;
+    saveResume(styleConfig);
+  };
+
+  /** Select a resume and restore its saved styles */
+  const handleSelectResume = (id) => {
+    selectResume(id);
+    const savedStyles = getResumeStyles(id);
+    if (savedStyles) {
+      setStyleConfig({ ...defaultStyleConfig, ...savedStyles });
+    } else {
+      setStyleConfig(defaultStyleConfig);
+    }
+  };
+
+  // Restore saved styles when a resume is first loaded (e.g. on login)
+  useEffect(() => {
+    if (!currentResumeId) return;
+    const savedStyles = getResumeStyles(currentResumeId);
+    if (savedStyles) {
+      setStyleConfig({ ...defaultStyleConfig, ...savedStyles });
+    }
+  }, [currentResumeId]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Build tab list — append Admin tab only for admin users
   const TABS = isAdmin ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
@@ -120,42 +152,85 @@ const Builder = () => {
             )}
           </div>
 
-          <button
-            id="download-pdf-btn"
-            onClick={handleDownload}
-            disabled={isPrinting}
-            className={`
-              group flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm
-              shadow-md transition-all duration-200 select-none flex-shrink-0
-              ${isPrinting
-                ? 'bg-blue-400 cursor-not-allowed text-white'
-                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white cursor-pointer'
-              }
-            `}
-          >
-            {isPrinting ? (
-              <>
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10"
-                    stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Preparing…
-              </>
-            ) : (
-              <>
-                <svg
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                PDF
-              </>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Save button — only for logged-in users */}
+            {isLoggedIn && (
+              <button
+                id="save-resume-btn"
+                onClick={handleSave}
+                disabled={syncStatus === 'saving'}
+                className={`
+                  group relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-bold text-sm
+                  shadow-md transition-all duration-200 select-none
+                  ${syncStatus === 'saving'
+                    ? 'bg-emerald-400 cursor-not-allowed text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white cursor-pointer'
+                  }
+                `}
+              >
+                {syncStatus === 'saving' ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10"
+                        stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                    </svg>
+                    Save
+                  </>
+                )}
+                {/* Unsaved changes dot */}
+                {hasUnsavedChanges && syncStatus !== 'saving' && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400
+                                   border-2 border-white animate-pulse" />
+                )}
+              </button>
             )}
-          </button>
+
+            <button
+              id="download-pdf-btn"
+              onClick={handleDownload}
+              disabled={isPrinting}
+              className={`
+                group flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm
+                shadow-md transition-all duration-200 select-none
+                ${isPrinting
+                  ? 'bg-blue-400 cursor-not-allowed text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white cursor-pointer'
+                }
+              `}
+            >
+              {isPrinting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10"
+                      stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Preparing…
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  PDF
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Tab switcher */}
@@ -203,6 +278,8 @@ const Builder = () => {
               </div>
             )}
             <div className={`space-y-8 pb-24 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
+              {/* Resume Manager — only for logged-in users */}
+              {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
               <PersonalInfoForm onAuthClick={() => openAuth('login')} />
               <ProfessionalSummaryForm onAuthClick={() => openAuth('login')} />
               <SummaryForm onAuthClick={() => openAuth('login')} />
