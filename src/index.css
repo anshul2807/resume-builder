@@ -166,3 +166,540 @@
 .tab-inactive:hover {
   color: #475569;
 }
+
+/* ─── ATS Score Modal ────────────────────────────────────── */
+.ats-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: ats-fade-in 0.2s ease-out;
+}
+
+.ats-modal {
+  width: 95%;
+  max-width: 520px;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ats-slide-up 0.3s ease-out;
+}
+
+.ats-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%);
+}
+
+.ats-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ats-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ats-modal-icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.ats-modal-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ats-modal-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.ats-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ats-modal-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.ats-modal-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ats-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Form ────────────────────────────────────────────────── */
+.ats-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ats-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ats-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.01em;
+}
+
+.ats-label-icon {
+  font-size: 14px;
+}
+
+.ats-optional-badge {
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ats-exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ats-input-wrap {
+  position: relative;
+}
+
+.ats-input-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.ats-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.ats-input:focus {
+  border-color: #818cf8;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+}
+
+.ats-input::placeholder {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.ats-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.ats-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.ats-error-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ats-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.ats-submit-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.ats-submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ats-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ats-spinner {
+  width: 18px;
+  height: 18px;
+  animation: spin 0.8s linear infinite;
+}
+
+.ats-spinner-track {
+  opacity: 0.25;
+}
+
+.ats-spinner-head {
+  opacity: 0.75;
+}
+
+.ats-info-note {
+  text-align: center;
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* ── Results ─────────────────────────────────────────────── */
+.ats-result {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: ats-fade-in 0.4s ease-out;
+}
+
+.ats-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.ats-score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--score-color) 0deg,
+    var(--score-color) var(--score-deg),
+    #f1f5f9 var(--score-deg),
+    #f1f5f9 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ats-score-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.ats-score-inner {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ats-score-number {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--score-color);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.ats-score-out-of {
+  font-size: 16px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.ats-score-label {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.ats-result-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.ats-result-summary p {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.ats-suggestions {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.ats-suggestions-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #92400e;
+  margin: 0 0 12px;
+}
+
+.ats-suggestions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ats-suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #78350f;
+  line-height: 1.55;
+}
+
+.ats-suggestion-bullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #fde68a;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ats-result-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ats-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ats-back-btn:hover {
+  background: #e2e8f0;
+}
+
+.ats-done-btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ats-done-btn:hover {
+  opacity: 0.92;
+}
+
+/* ── ATS Button in AISettingsPanel ────────────────────────── */
+.ats-trigger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.ats-trigger-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.ats-trigger-btn:hover::before {
+  left: 100%;
+}
+
+.ats-trigger-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+}
+
+.ats-trigger-btn:active {
+  transform: scale(0.98);
+}
+
+.ats-trigger-cost {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes ats-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ats-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ats-score-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import ATSScoreModal from './ATSScoreModal';
 
 /**
  * AISettingsPanel — replaces the old provider/API-key panel.
@@ -18,8 +19,13 @@ const AISettingsPanel = ({ onOpenAuth }) => {
 
     const usagePct = Math.min((enhanceUsageToday / DAILY_ENHANCE_LIMIT) * 100, 100);
 
+    const [atsModalOpen, setAtsModalOpen] = useState(false);
+
     return (
         <div className="pb-24 space-y-6">
+
+            {/* ATS Score Modal */}
+            <ATSScoreModal isOpen={atsModalOpen} onClose={() => setAtsModalOpen(false)} />
 
             {/* Hero card */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 p-5 text-white">
@@ -107,6 +113,20 @@ const AISettingsPanel = ({ onOpenAuth }) => {
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         AI Enhancement active — click any ✦ star button
                     </div>
+
+                    {/* ATS Score Check Button */}
+                    <button
+                        id="ats-score-btn"
+                        onClick={() => setAtsModalOpen(true)}
+                        className="ats-trigger-btn"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 18, height: 18 }}>
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        ATS Score Check
+                        <span className="ats-trigger-cost">1 Tokens</span>
+                    </button>
 
                     {/* What AI does info box */}
                     <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 space-y-2">
