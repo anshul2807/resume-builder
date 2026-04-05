@@ -36,6 +36,9 @@ import AdminPanel from '../components/admin/AdminPanel';
 // ── Resume manager (multi-resume) ─────────────────────────────────────────────
 import ResumeManager from '../components/common/ResumeManager';
 
+// ── Resume importer ───────────────────────────────────────────────────────────
+import ResumeImportModal from '../components/import/ResumeImportModal';
+
 const BASE_TABS = [
   { id: 'content', label: 'Content', emoji: '✏️' },
   { id: 'style', label: 'Style', emoji: '🎨' },
@@ -52,6 +55,9 @@ const Builder = () => {
   // Auth modal state
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState('login');
+
+  // Import modal state
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const { isLoggedIn, user, token, tokens, refreshUsage, isAdmin } = useAuth();
   const { syncStatus, saveResume, hasUnsavedChanges, selectResume, getResumeStyles, currentResumeId } = useResume();
@@ -137,6 +143,12 @@ const Builder = () => {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialTab={authModalTab}
+      />
+
+      {/* Resume Import Modal */}
+      <ResumeImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
       />
 
       {/* ══════════════════════════════════════════════════════
@@ -361,6 +373,25 @@ const Builder = () => {
             )}
             <div className={`space-y-8 pb-24 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
               {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
+              {isLoggedIn && (
+                <button
+                  id="import-resume-btn"
+                  onClick={() => setImportModalOpen(true)}
+                  className="import-content-btn"
+                >
+                  <div className="import-content-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 12l-4-4m0 0l-4 4m4-4v12" />
+                    </svg>
+                  </div>
+                  <div className="import-content-btn-text">
+                    <span className="import-content-btn-title">Import Existing Resume</span>
+                    <span className="import-content-btn-sub">Upload a PDF, DOCX, or TXT — AI will auto-fill all fields</span>
+                  </div>
+                  <span className="import-content-btn-cost">10 Tokens</span>
+                </button>
+              )}
               <PersonalInfoForm onAuthClick={() => openAuth('login')} />
               <ProfessionalSummaryForm onAuthClick={() => openAuth('login')} />
               <SummaryForm onAuthClick={() => openAuth('login')} />
@@ -426,6 +457,25 @@ const Builder = () => {
             )}
             <div className={`space-y-6 pb-32 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
               {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
+              {isLoggedIn && (
+                <button
+                  id="mobile-import-resume-btn"
+                  onClick={() => setImportModalOpen(true)}
+                  className="import-content-btn"
+                >
+                  <div className="import-content-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 12l-4-4m0 0l-4 4m4-4v12" />
+                    </svg>
+                  </div>
+                  <div className="import-content-btn-text">
+                    <span className="import-content-btn-title">Import Existing Resume</span>
+                    <span className="import-content-btn-sub">Upload PDF, DOCX or TXT — AI auto-fills all fields</span>
+                  </div>
+                  <span className="import-content-btn-cost">10 Tokens</span>
+                </button>
+              )}
               <PersonalInfoForm onAuthClick={() => openAuth('login')} />
               <ProfessionalSummaryForm onAuthClick={() => openAuth('login')} />
               <SummaryForm onAuthClick={() => openAuth('login')} />
