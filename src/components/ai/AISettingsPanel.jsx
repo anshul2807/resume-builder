@@ -14,10 +14,8 @@ import ATSScoreModal from './ATSScoreModal';
 const AISettingsPanel = ({ onOpenAuth }) => {
     const {
         isLoggedIn, user, logout,
-        enhanceUsageToday, enhanceLimitReached, DAILY_ENHANCE_LIMIT,
+        tokens, hasEnhanceTokens
     } = useAuth();
-
-    const usagePct = Math.min((enhanceUsageToday / DAILY_ENHANCE_LIMIT) * 100, 100);
 
     const [atsModalOpen, setAtsModalOpen] = useState(false);
 
@@ -75,34 +73,23 @@ const AISettingsPanel = ({ onOpenAuth }) => {
                         </button>
                     </div>
 
-                    {/* Daily usage meter */}
+                    {/* API Token balance */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
-                                Daily AI Enhances
+                                Total AI Tokens
                             </p>
-                            <span className={`text-[11px] font-bold ${enhanceLimitReached ? 'text-red-500' : 'text-slate-600'}`}>
-                                {enhanceUsageToday} / {DAILY_ENHANCE_LIMIT}
+                            <span className={`text-[11px] font-bold ${!hasEnhanceTokens ? 'text-red-500' : 'text-slate-600'}`}>
+                                {tokens} available
                             </span>
                         </div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full rounded-full transition-all duration-500
-                                    ${enhanceLimitReached
-                                        ? 'bg-red-400'
-                                        : usagePct > 70
-                                            ? 'bg-amber-400'
-                                            : 'bg-gradient-to-r from-violet-500 to-purple-500'}`}
-                                style={{ width: `${usagePct}%` }}
-                            />
-                        </div>
-                        {enhanceLimitReached ? (
+                        {!hasEnhanceTokens ? (
                             <p className="text-[10px] text-red-500 mt-1.5 font-semibold">
-                                Daily limit reached — resets at midnight.
+                                Out of tokens. Please purchase or earn more.
                             </p>
                         ) : (
                             <p className="text-[10px] text-slate-400 mt-1.5">
-                                Resets daily at midnight. Limit: {DAILY_ENHANCE_LIMIT} enhancements/day.
+                                You have {tokens} tokens remaining in your account.
                             </p>
                         )}
                     </div>
@@ -164,7 +151,7 @@ const AISettingsPanel = ({ onOpenAuth }) => {
                                 <p className="text-sm font-bold text-amber-800 mb-1">AI Enhance requires login</p>
                                 <p className="text-[11px] text-amber-700 leading-relaxed">
                                     Create a free account to unlock AI-powered text enhancement.
-                                    You get <strong>{DAILY_ENHANCE_LIMIT} enhancements per day</strong>.
+                                    You get <strong>10 free tokens</strong>.
                                 </p>
                             </div>
                         </div>

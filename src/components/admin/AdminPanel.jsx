@@ -7,16 +7,16 @@ import { useAuth } from '../../context/AuthContext';
  *
  * Features:
  *  - List all registered users (GET /api/admin/users)
- *  - Edit any user's daily AI Enhance token limit (PATCH /api/admin/users/:id/limit)
+ *  - Edit any user's total AI Token balance (PATCH /api/admin/users/:id/tokens)
  *  - Search/filter users by name or email
  *
  * Backend endpoints required:
  *  GET  /api/admin/users
- *    → { users: [{ id, name, email, dailyLimit, enhanceUsageToday, createdAt }] }
+ *    → { users: [{ id, name, email, tokens, createdAt }] }
  *
- *  PATCH /api/admin/users/:id/limit
- *    Body: { dailyLimit: number }
- *    → { message: "Updated", user: { id, dailyLimit } }
+ *  PATCH /api/admin/users/:id/tokens
+ *    Body: { tokens: number }
+ *    → { message: "Updated", user: { id, tokens } }
  */
 const AdminPanel = () => {
     const { token } = useAuth();
@@ -39,10 +39,12 @@ const AdminPanel = () => {
             const res = await fetch(`${BASE_URL}/api/admin/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err?.message || `Error ${res.status}`);
             }
+            // console.log("hi");
             const data = await res.json();
             // console.log(data);
             setUsers(data.length > 0 ? data : []);
@@ -55,7 +57,7 @@ const AdminPanel = () => {
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-    // ── Save limit ────────────────────────────────────────────────────────
+    // ── Save tokens ────────────────────────────────────────────────────────
     const saveLimit = async (userId, newLimit) => {
         const parsed = parseInt(newLimit, 10);
         if (isNaN(parsed) || parsed < 0) return;
@@ -63,22 +65,22 @@ const AdminPanel = () => {
         setSaving(true);
         setSaveMsg({ id: null, type: '', text: '' });
         try {
-            const res = await fetch(`${BASE_URL}/api/admin/users/${userId}/limit`, {
+            const res = await fetch(`${BASE_URL}/api/admin/users/${userId}/tokens`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ dailyLimit: parsed }),
+                body: JSON.stringify({ tokens: parsed }),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
 
             // Update local state
             setUsers((prev) =>
-                prev.map((u) => u.id === userId ? { ...u, dailyLimit: parsed } : u)
+                prev.map((u) => u.id === userId ? { ...u, tokens: parsed } : u)
             );
-            setSaveMsg({ id: userId, type: 'success', text: `✓ Limit set to ${parsed}` });
+            setSaveMsg({ id: userId, type: 'success', text: `✓ Tokens set to ${parsed}` });
             setEditing(null);
         } catch (err) {
             setSaveMsg({ id: userId, type: 'error', text: err.message });
@@ -110,7 +112,7 @@ const AdminPanel = () => {
                     <div>
                         <p className="font-black text-sm tracking-wide">Admin Control Panel</p>
                         <p className="text-[11px] text-white/80 mt-0.5 leading-snug">
-                            Manage users and configure their daily AI Enhance token limits.
+                            Manage users and configure their AI Token balance.
                         </p>
                     </div>
                 </div>
@@ -184,7 +186,6 @@ const AdminPanel = () => {
             <div className="space-y-2">
                 {filteredUsers.map((u) => {
                     const isEditing = editing?.userId === u.id;
-                    const usagePct = Math.min(((u.usedToday ?? 0) / (u.dailyLimit || 1)) * 100, 100);
 
                     return (
                         <div key={u.id}
@@ -215,21 +216,12 @@ const AdminPanel = () => {
                             <div className="bg-slate-50 rounded-xl p-3">
                                 <div className="flex items-center justify-between mb-1.5">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                        Daily AI Token Limit
+                                        Total AI Tokens
                                     </p>
 
                                     <span className="text-[11px] font-bold text-slate-600">
-                                        {u.usedToday ?? 0} / {u.dailyLimit ?? '—'} today
+                                        {u.tokens ?? 0} remaining
                                     </span>
-                                </div>
-
-                                {/* Usage bar */}
-                                <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden mb-2">
-                                    <div
-                                        className={`h-full rounded-full transition-all duration-500
-                                            ${usagePct >= 100 ? 'bg-red-400' : usagePct > 70 ? 'bg-amber-400' : 'bg-emerald-400'}`}
-                                        style={{ width: `${usagePct}%` }}
-                                    />
                                 </div>
 
                                 {/* Edit limit row */}
@@ -269,11 +261,11 @@ const AdminPanel = () => {
                                     ) : (
                                         <>
                                             <span className="text-[12px] font-bold text-slate-700 min-w-[32px]">
-                                                {u.dailyLimit ?? '—'}
+                                                {u.tokens ?? 0}
                                             </span>
-                                            <span className="text-[11px] text-slate-400 flex-1">enhancements/day</span>
+                                            <span className="text-[11px] text-slate-400 flex-1">tokens available</span>
                                             <button
-                                                onClick={() => setEditing({ userId: u.id, value: String(u.dailyLimit ?? 10) })}
+                                                onClick={() => setEditing({ userId: u.id, value: String(u.tokens ?? 0) })}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold
                                                            text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg
                                                            transition-colors border border-rose-100"
@@ -281,7 +273,7 @@ const AdminPanel = () => {
                                                 <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
                                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                 </svg>
-                                                Edit limit
+                                                Edit tokens
                                             </button>
                                         </>
                                     )}

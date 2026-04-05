@@ -52,7 +52,7 @@ const Builder = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState('login');
 
-  const { isLoggedIn, user, logout, isAdmin } = useAuth();
+  const { isLoggedIn, user, token, tokens, refreshUsage, isAdmin } = useAuth();
   const { syncStatus, saveResume, hasUnsavedChanges, selectResume, getResumeStyles, currentResumeId } = useResume();
   const { styleConfig, setStyleConfig } = useStyle();
 
@@ -60,6 +60,40 @@ const Builder = () => {
   const handleSave = () => {
     if (!isLoggedIn) return;
     saveResume(styleConfig);
+  };
+
+  /** Check tokens and deduct before downloading PDF */
+  const handleDownloadClick = async () => {
+    if (!isLoggedIn) {
+      openAuth('login');
+      return;
+    }
+
+    if (tokens < 5) {
+      alert('Not enough tokens to download. Downloading costs 5 tokens.');
+      return;
+    }
+
+    // Deduct tokens
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL || 'http://localhost:5001'}/api/ai/deduct-download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to deduct tokens.');
+        return;
+      }
+      refreshUsage(); // update token balance context
+      handleDownload(); // trigger actual PDF download
+    } catch (err) {
+      alert('Network error. Failed to download.');
+    }
   };
 
   /** Select a resume and restore its saved styles */
@@ -196,7 +230,7 @@ const Builder = () => {
 
             <button
               id="download-pdf-btn"
-              onClick={handleDownload}
+              onClick={handleDownloadClick}
               disabled={isPrinting}
               className={`
                 group flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm
@@ -226,7 +260,7 @@ const Builder = () => {
                     <path strokeLinecap="round" strokeLinejoin="round"
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  PDF
+                  PDF (5 tokens)
                 </>
               )}
             </button>

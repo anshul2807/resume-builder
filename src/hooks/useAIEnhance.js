@@ -45,7 +45,7 @@ const PROMPTS = {
  * @returns {Promise<string>} The improved text from Gemini
  */
 const useAIEnhance = () => {
-    const { isLoggedIn, token, enhanceLimitReached, incrementEnhanceUsage, DAILY_ENHANCE_LIMIT } = useAuth();
+    const { isLoggedIn, token, hasEnhanceTokens, decrementTokens } = useAuth();
 
     const enhance = async (text, context = 'generic') => {
         // ── Auth gate ──────────────────────────────────────────────────────
@@ -54,9 +54,9 @@ const useAIEnhance = () => {
         }
 
         // ── Rate limit gate ────────────────────────────────────────────────
-        if (enhanceLimitReached) {
+        if (!hasEnhanceTokens) {
             throw new Error(
-                `You've reached your daily limit of ${DAILY_ENHANCE_LIMIT} AI enhancements. Come back tomorrow!`
+                `You don't have enough tokens to enhance this text. Please get more tokens.`
             );
         }
 
@@ -85,8 +85,8 @@ const useAIEnhance = () => {
         const data = await res.json();
         const result = data?.result?.trim() ?? '';
 
-        // Increment local counter + refresh from backend
-        if (result) incrementEnhanceUsage();
+        // Decrement local counter + refresh from backend
+        if (result) decrementTokens(1);
 
         return result;
     };

@@ -11,7 +11,7 @@ import { BASE_URL } from '../config/api';
  * ATS score (0–100) and improvement suggestions.
  */
 const useATSScore = () => {
-    const { isLoggedIn, token, enhanceUsageToday, DAILY_ENHANCE_LIMIT, refreshUsage } = useAuth();
+    const { isLoggedIn, token, tokens, refreshUsage } = useAuth();
     const { resumeData } = useResume();
 
     const TOKEN_COST = 1;
@@ -27,7 +27,7 @@ const useATSScore = () => {
         }
 
         // ── Token gate — need at least 5 remaining ────────────────────
-        const remaining = DAILY_ENHANCE_LIMIT - enhanceUsageToday;
+        const remaining = tokens || 0;
         if (remaining < TOKEN_COST) {
             throw new Error(
                 `ATS Score Check costs ${TOKEN_COST} tokens. You only have ${remaining} remaining today.`

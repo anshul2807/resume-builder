@@ -21,7 +21,7 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const enhance = useAIEnhance();
-    const { isLoggedIn, enhanceLimitReached, enhanceUsageToday, DAILY_ENHANCE_LIMIT } = useAuth();
+    const { isLoggedIn, hasEnhanceTokens, tokens } = useAuth();
 
     const handleClick = async () => {
         // Guest click → open auth modal instead of calling AI
@@ -30,8 +30,8 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
             return;
         }
 
-        if (enhanceLimitReached) {
-            setError(`Daily limit of ${DAILY_ENHANCE_LIMIT} reached. Come back tomorrow!`);
+        if (!hasEnhanceTokens) {
+            setError(`You have no tokens left. Come back tomorrow!`);
             setTimeout(() => setError(null), 4000);
             return;
         }
@@ -66,11 +66,11 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
                     title={
                         isGuest
                             ? 'Log in to use AI Enhancement'
-                            : enhanceLimitReached
-                                ? `Daily limit (${DAILY_ENHANCE_LIMIT}) reached`
+                            : !hasEnhanceTokens
+                                ? `Out of tokens`
                                 : isEmpty
                                     ? 'Type something first'
-                                    : `Enhance with AI ✦ (${enhanceUsageToday}/${DAILY_ENHANCE_LIMIT} today)`
+                                    : `Enhance with AI ✦ (${tokens} tokens remaining)`
                     }
                     className={`
                         w-7 h-7 rounded-full flex items-center justify-center
@@ -79,7 +79,7 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
                             ? 'bg-purple-100 cursor-not-allowed'
                             : isGuest
                                 ? 'bg-slate-100 text-slate-400 cursor-pointer hover:bg-slate-200 hover:scale-110'
-                                : enhanceLimitReached
+                                : !hasEnhanceTokens
                                     ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                                     : isEmpty
                                         ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
@@ -135,7 +135,7 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
                         ? 'bg-purple-100 text-purple-400 cursor-not-allowed'
                         : isGuest
                             ? 'bg-slate-100 text-slate-500 cursor-pointer hover:bg-slate-200'
-                            : enhanceLimitReached
+                            : !hasEnhanceTokens
                                 ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                                 : isEmpty
                                     ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
@@ -169,9 +169,9 @@ const AIButton = ({ value, onReplace, context = 'generic', size = 'sm', onAuthCl
                         ? 'Done!'
                         : isGuest
                             ? '🔒 Log in to Enhance'
-                            : enhanceLimitReached
-                                ? `Limit reached (${DAILY_ENHANCE_LIMIT}/day)`
-                                : `✦ Enhance with AI (${enhanceUsageToday}/${DAILY_ENHANCE_LIMIT})`}
+                            : !hasEnhanceTokens
+                                ? `Out of tokens`
+                                : `✦ Enhance with AI (${tokens} left)`}
             </button>
 
             {error && (

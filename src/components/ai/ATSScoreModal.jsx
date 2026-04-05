@@ -16,7 +16,7 @@ import { useAuth } from '../../context/AuthContext';
  */
 const ATSScoreModal = ({ isOpen, onClose }) => {
     const { checkATSScore, TOKEN_COST } = useATSScore();
-    const { enhanceUsageToday, DAILY_ENHANCE_LIMIT } = useAuth();
+    const { tokens } = useAuth();
 
     // ── Form state ──────────────────────────────────────────────────
     const [experienceYears, setExperienceYears] = useState('');
@@ -29,7 +29,7 @@ const ATSScoreModal = ({ isOpen, onClose }) => {
     const [result, setResult] = useState(null);   // { score, summary, suggestions }
     const [error, setError] = useState('');
 
-    const remaining = DAILY_ENHANCE_LIMIT - enhanceUsageToday;
+    const remaining = tokens || 0;
     const canAfford = remaining >= TOKEN_COST;
 
     const handleSubmit = async (e) => {
