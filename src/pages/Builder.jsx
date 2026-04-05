@@ -39,6 +39,9 @@ import ResumeManager from '../components/common/ResumeManager';
 // ── Resume importer ───────────────────────────────────────────────────────────
 import ResumeImportModal from '../components/import/ResumeImportModal';
 
+// ── Token purchase ────────────────────────────────────────────────────────────
+import TokenPurchaseModal from '../components/payment/TokenPurchaseModal';
+
 const BASE_TABS = [
   { id: 'content', label: 'Content', emoji: '✏️' },
   { id: 'style', label: 'Style', emoji: '🎨' },
@@ -59,6 +62,9 @@ const Builder = () => {
   // Import modal state
   const [importModalOpen, setImportModalOpen] = useState(false);
 
+  // Token purchase modal state
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
+
   const { isLoggedIn, user, token, tokens, refreshUsage, isAdmin } = useAuth();
   const { syncStatus, saveResume, hasUnsavedChanges, selectResume, getResumeStyles, currentResumeId } = useResume();
   const { styleConfig, setStyleConfig } = useStyle();
@@ -77,7 +83,7 @@ const Builder = () => {
     }
 
     if (tokens < 5) {
-      alert('Not enough tokens to download. Downloading costs 5 tokens.');
+      setPurchaseModalOpen(true);
       return;
     }
 
@@ -149,6 +155,12 @@ const Builder = () => {
       <ResumeImportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}
+      />
+
+      {/* Token Purchase Modal */}
+      <TokenPurchaseModal
+        isOpen={purchaseModalOpen}
+        onClose={() => setPurchaseModalOpen(false)}
       />
 
       {/* ══════════════════════════════════════════════════════
@@ -372,6 +384,28 @@ const Builder = () => {
               </div>
             )}
             <div className={`space-y-8 pb-24 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
+              {/* Out of Tokens Banner */}
+              {isLoggedIn && tokens < 1 && (
+                <div className="oot-banner">
+                  <div className="oot-banner-top">
+                    <div className="oot-banner-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="oot-banner-title">You're out of tokens!</p>
+                      <p className="oot-banner-desc">Purchase a token pack to continue using AI features, downloading PDFs, and more.</p>
+                    </div>
+                  </div>
+                  <button className="oot-banner-btn" onClick={() => setPurchaseModalOpen(true)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Buy Tokens — Plans from ₹50
+                  </button>
+                </div>
+              )}
               {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
               {isLoggedIn && (
                 <button
@@ -402,7 +436,7 @@ const Builder = () => {
             </div>
           </div>
           <div className={activeTab === 'style' ? 'block' : 'hidden'}><StyleSidebar /></div>
-          <div className={activeTab === 'ai' ? 'block' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} /></div>
+          <div className={activeTab === 'ai' ? 'block' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} onOpenPurchase={() => setPurchaseModalOpen(true)} /></div>
           {isAdmin && (
             <div className={activeTab === 'admin' ? 'block' : 'hidden'}><AdminPanel /></div>
           )}
@@ -456,6 +490,28 @@ const Builder = () => {
               </div>
             )}
             <div className={`space-y-6 pb-32 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
+              {/* Out of Tokens Banner — Mobile */}
+              {isLoggedIn && tokens < 1 && (
+                <div className="oot-banner">
+                  <div className="oot-banner-top">
+                    <div className="oot-banner-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="oot-banner-title">You're out of tokens!</p>
+                      <p className="oot-banner-desc">Purchase a token pack to continue using AI features, downloading PDFs, and more.</p>
+                    </div>
+                  </div>
+                  <button className="oot-banner-btn" onClick={() => setPurchaseModalOpen(true)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Buy Tokens — Plans from ₹50
+                  </button>
+                </div>
+              )}
               {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
               {isLoggedIn && (
                 <button
@@ -486,7 +542,7 @@ const Builder = () => {
             </div>
           </div>
           <div className={activeTab === 'style' ? 'block pb-32' : 'hidden'}><StyleSidebar /></div>
-          <div className={activeTab === 'ai' ? 'block pb-32' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} /></div>
+          <div className={activeTab === 'ai' ? 'block pb-32' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} onOpenPurchase={() => setPurchaseModalOpen(true)} /></div>
           {isAdmin && (
             <div className={activeTab === 'admin' ? 'block pb-32' : 'hidden'}><AdminPanel /></div>
           )}

@@ -11,7 +11,7 @@ import ATSScoreModal from './ATSScoreModal';
  * Props:
  *  onOpenAuth — callback(tab) — opens the AuthModal with 'login' or 'signup'
  */
-const AISettingsPanel = ({ onOpenAuth }) => {
+const AISettingsPanel = ({ onOpenAuth, onOpenPurchase }) => {
     const {
         isLoggedIn, user, logout,
         tokens, hasEnhanceTokens
@@ -84,9 +84,21 @@ const AISettingsPanel = ({ onOpenAuth }) => {
                             </span>
                         </div>
                         {!hasEnhanceTokens ? (
-                            <p className="text-[10px] text-red-500 mt-1.5 font-semibold">
-                                Out of tokens. Please purchase or earn more.
-                            </p>
+                            <>
+                                <p className="text-[10px] text-red-500 mt-1.5 font-semibold">
+                                    Out of tokens. Purchase more to continue.
+                                </p>
+                                <button
+                                    id="buy-tokens-btn"
+                                    onClick={() => onOpenPurchase?.()}
+                                    className="buy-tokens-btn mt-3"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Buy Tokens — Plans from ₹50
+                                </button>
+                            </>
                         ) : (
                             <p className="text-[10px] text-slate-400 mt-1.5">
                                 You have {tokens} tokens remaining in your account.
