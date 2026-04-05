@@ -1005,3 +1005,337 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE LAYOUT
+   Mobile-first: components are shown/hidden via media queries
+═══════════════════════════════════════════════════════ */
+
+/* ── Builder root: flex column on mobile, row on desktop ── */
+.builder-root {
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── Desktop sidebar: hidden on mobile ─────────────────── */
+.desktop-sidebar {
+  display: none;
+}
+
+/* ── Desktop preview: hidden on mobile ─────────────────── */
+.desktop-preview {
+  display: none !important;
+}
+
+/* ── Mobile top bar ────────────────────────────────────── */
+.mobile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mobile-brand {
+  font-size: 18px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.mobile-auth-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.mobile-avatar-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.mobile-auth-btn-ghost {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.mobile-auth-btn-ghost:hover {
+  color: #2563eb;
+}
+
+.mobile-auth-btn-solid {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  background: #2563eb;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobile-auth-btn-solid:hover {
+  background: #1d4ed8;
+}
+
+.mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mobile-save-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: #059669;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mobile-save-btn:active {
+  transform: scale(0.92);
+}
+
+.mobile-unsaved-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 2px solid white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Mobile editor panel ───────────────────────────────── */
+.mobile-editor-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: white;
+  overflow: hidden;
+}
+
+.mobile-inner-tabs {
+  padding: 10px 14px 6px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── Mobile preview panel ──────────────────────────────── */
+.mobile-preview-panel {
+  flex: 1;
+  min-height: 0;
+  background: #d1d5db;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-preview-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+  box-sizing: border-box;
+  padding-bottom: 100px;
+}
+
+/* Scale the A4 resume to fit smaller screens */
+.mobile-resume-scaler {
+  transform-origin: top center;
+  /* At mobile widths (~375px), an A4 (794px wide) needs ~0.42 scale.
+     We let CSS clamp handle it gracefully. */
+}
+
+/* ── Show/hide panels ──────────────────────────────────── */
+.mobile-panel-visible {
+  display: flex;
+}
+
+.mobile-panel-hidden {
+  display: none !important;
+}
+
+/* ── Floating Download FAB ─────────────────────────────── */
+.mobile-download-fab {
+  position: absolute;
+  bottom: 80px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+  transition: all 0.2s ease;
+  z-index: 40;
+}
+
+.mobile-download-fab:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.mobile-download-fab:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Mobile bottom nav bar ─────────────────────────────── */
+.mobile-bottom-nav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.mobile-nav-active {
+  color: #2563eb;
+}
+
+.mobile-nav-inactive {
+  color: #94a3b8;
+}
+
+.mobile-nav-inactive:hover {
+  color: #475569;
+}
+
+/* Pad the main scroll area so content isn't hidden behind the bottom nav */
+.builder-root {
+  padding-bottom: 60px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP BREAKPOINT (md = 768px+)
+   On md+: restore the original 2-column split layout
+══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .builder-root {
+    flex-direction: row;
+    padding-bottom: 0;
+  }
+
+  /* Hide all mobile-specific elements */
+  .mobile-topbar,
+  .mobile-editor-panel,
+  .mobile-preview-panel,
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Show desktop elements */
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    height: 100vh;
+    border-right: 1px solid #e2e8f0;
+    background: white;
+    flex-shrink: 0;
+  }
+
+  .desktop-preview {
+    display: flex !important;
+  }
+}
+
+/* ── Small mobile scale tweak ──────────────────────────── */
+@media (max-width: 767px) {
+  .mobile-resume-scaler {
+    /* Resume is 210mm ≈ 794px. Scale to fit viewport with padding */
+    width: 210mm;
+    transform: scale(calc((100vw - 32px) / 794px));
+    transform-origin: top center;
+    margin-bottom: calc(-1 * (794px - (100vw - 32px)));
+  }
+}
+
+/* ── Narrow phone adjustments (< 400px) ───────────────── */
+@media (max-width: 400px) {
+  .mobile-brand {
+    font-size: 15px;
+  }
+
+  .mobile-download-fab {
+    padding: 12px 16px;
+    font-size: 13px;
+    bottom: 72px;
+  }
+}

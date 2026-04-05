@@ -46,6 +46,7 @@ const ADMIN_TAB = { id: 'admin', label: 'Admin', emoji: '⚙️' };
 
 const Builder = () => {
   const [activeTab, setActiveTab] = useState('content');
+  const [mobileView, setMobileView] = useState('editor'); // 'editor' | 'preview'
   const { printRef, handleDownload, isPrinting } = usePdfDownload('My_Resume');
 
   // Auth modal state
@@ -126,7 +127,7 @@ const Builder = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex overflow-hidden">
+    <div className="builder-root min-h-screen bg-gray-100 flex overflow-hidden">
 
       {/* StyleInjector syncs styleConfig → <style> in <head> without re-renders */}
       <StyleInjector />
@@ -138,8 +139,61 @@ const Builder = () => {
         initialTab={authModalTab}
       />
 
-      {/* ── LEFT: Tabbed Sidebar ─────────────────────────────────── */}
-      <div className="no-print w-2/5 flex flex-col h-screen border-r bg-white">
+      {/* ══════════════════════════════════════════════════════
+          MOBILE TOP BAR (hidden on md+)
+      ══════════════════════════════════════════════════════ */}
+      <div className="no-print mobile-topbar">
+        {/* Brand */}
+        <h1 className="mobile-brand">Draft2paper</h1>
+
+        {/* Auth chip */}
+        <div className="mobile-auth-area">
+          {isLoggedIn ? (
+            <div className="mobile-avatar-chip">
+              <div className="mobile-avatar">
+                {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'}
+              </div>
+              <SyncStatusBadge status={syncStatus} />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button id="mobile-login-btn" onClick={() => openAuth('login')} className="mobile-auth-btn-ghost">Log in</button>
+              <button id="mobile-signup-btn" onClick={() => openAuth('signup')} className="mobile-auth-btn-solid">Sign up</button>
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="mobile-actions">
+          {isLoggedIn && (
+            <button
+              id="mobile-save-btn"
+              onClick={handleSave}
+              disabled={syncStatus === 'saving'}
+              className="mobile-save-btn"
+            >
+              {syncStatus === 'saving' ? (
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                </svg>
+              )}
+              {hasUnsavedChanges && syncStatus !== 'saving' && (
+                <span className="mobile-unsaved-dot" />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          DESKTOP LEFT SIDEBAR (hidden on mobile)
+      ══════════════════════════════════════════════════════ */}
+      <div className="no-print desktop-sidebar">
 
         {/* Sticky top bar: branding + auth + sync + Download */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 flex-shrink-0 gap-2">
@@ -161,7 +215,6 @@ const Builder = () => {
                     {user?.name ?? user?.email}
                   </span>
                 </div>
-                {/* Live sync indicator — only shown when not idle */}
                 <SyncStatusBadge status={syncStatus} />
               </>
             ) : (
@@ -187,7 +240,6 @@ const Builder = () => {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Save button — only for logged-in users */}
             {isLoggedIn && (
               <button
                 id="save-resume-btn"
@@ -220,7 +272,6 @@ const Builder = () => {
                     Save
                   </>
                 )}
-                {/* Unsaved changes dot */}
                 {hasUnsavedChanges && syncStatus !== 'saving' && (
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400
                                    border-2 border-white animate-pulse" />
@@ -298,10 +349,7 @@ const Builder = () => {
 
         {/* Scrollable panel area */}
         <div className="flex-1 overflow-y-auto scrollbar-hide px-8 pt-6">
-
-          {/* CONTENT TAB */}
           <div className={activeTab === 'content' ? 'block' : 'hidden'}>
-            {/* Loading overlay while fetching resume from backend */}
             {syncStatus === 'loading' && (
               <div className="flex flex-col items-center justify-center py-20 gap-4 animate-pulse">
                 <svg className="w-8 h-8 text-blue-500 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -312,7 +360,6 @@ const Builder = () => {
               </div>
             )}
             <div className={`space-y-8 pb-24 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
-              {/* Resume Manager — only for logged-in users */}
               {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
               <PersonalInfoForm onAuthClick={() => openAuth('login')} />
               <ProfessionalSummaryForm onAuthClick={() => openAuth('login')} />
@@ -323,32 +370,151 @@ const Builder = () => {
               <EducationForm onAuthClick={() => openAuth('login')} />
             </div>
           </div>
-
-          {/* STYLE TAB */}
-          <div className={activeTab === 'style' ? 'block' : 'hidden'}>
-            <StyleSidebar />
-          </div>
-
-          {/* AI TAB */}
-          <div className={activeTab === 'ai' ? 'block' : 'hidden'}>
-            <AISettingsPanel onOpenAuth={openAuth} />
-          </div>
-
-          {/* ADMIN TAB — only rendered for admin users */}
+          <div className={activeTab === 'style' ? 'block' : 'hidden'}><StyleSidebar /></div>
+          <div className={activeTab === 'ai' ? 'block' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} /></div>
           {isAdmin && (
-            <div className={activeTab === 'admin' ? 'block' : 'hidden'}>
-              <AdminPanel />
-            </div>
+            <div className={activeTab === 'admin' ? 'block' : 'hidden'}><AdminPanel /></div>
           )}
-
         </div>
       </div>
 
-      {/* ── RIGHT: Live A4 Preview ───────────────────────────────── */}
-      <div className="print-preview-wrapper w-3/5 bg-gray-300 p-12 overflow-y-auto h-screen flex justify-center items-start shadow-inner">
+      {/* ══════════════════════════════════════════════════════
+          MOBILE EDITOR PANEL (full screen, shown when mobileView==='editor')
+      ══════════════════════════════════════════════════════ */}
+      <div className={`no-print mobile-editor-panel ${mobileView === 'editor' ? 'mobile-panel-visible' : 'mobile-panel-hidden'}`}>
+
+        {/* Mobile Tab Bar */}
+        <div className="mobile-inner-tabs">
+          <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                id={`mobile-tab-${tab.id}`}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex-1 flex items-center justify-center gap-1
+                  py-2 px-1 rounded-lg text-[11px] font-semibold
+                  transition-all duration-200
+                  ${activeTab === tab.id
+                    ? tab.id === 'ai'
+                      ? 'bg-white text-violet-600 shadow-sm'
+                      : tab.id === 'admin'
+                        ? 'bg-white text-rose-600 shadow-sm'
+                        : 'tab-active'
+                    : 'tab-inactive'
+                  }
+                `}
+              >
+                <span>{tab.emoji}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Scrollable Content */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pt-4">
+          <div className={activeTab === 'content' ? 'block' : 'hidden'}>
+            {syncStatus === 'loading' && (
+              <div className="flex flex-col items-center justify-center py-16 gap-4 animate-pulse">
+                <svg className="w-8 h-8 text-blue-500 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <p className="text-sm font-semibold text-slate-500">Loading your resume…</p>
+              </div>
+            )}
+            <div className={`space-y-6 pb-32 ${syncStatus === 'loading' ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
+              {isLoggedIn && <ResumeManager onSelectResume={handleSelectResume} />}
+              <PersonalInfoForm onAuthClick={() => openAuth('login')} />
+              <ProfessionalSummaryForm onAuthClick={() => openAuth('login')} />
+              <SummaryForm onAuthClick={() => openAuth('login')} />
+              <ExperienceForm onAuthClick={() => openAuth('login')} />
+              <ProjectForm onAuthClick={() => openAuth('login')} />
+              <SkillsForm onAuthClick={() => openAuth('login')} />
+              <EducationForm onAuthClick={() => openAuth('login')} />
+            </div>
+          </div>
+          <div className={activeTab === 'style' ? 'block pb-32' : 'hidden'}><StyleSidebar /></div>
+          <div className={activeTab === 'ai' ? 'block pb-32' : 'hidden'}><AISettingsPanel onOpenAuth={openAuth} /></div>
+          {isAdmin && (
+            <div className={activeTab === 'admin' ? 'block pb-32' : 'hidden'}><AdminPanel /></div>
+          )}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          MOBILE PREVIEW PANEL (full screen, shown when mobileView==='preview')
+      ══════════════════════════════════════════════════════ */}
+      <div className={`mobile-preview-panel ${mobileView === 'preview' ? 'mobile-panel-visible' : 'mobile-panel-hidden'}`}>
+        <div className="mobile-preview-scroll">
+          <div className="mobile-resume-scaler">
+            <ResumeTemplate ref={printRef} />
+          </div>
+        </div>
+
+        {/* Floating Download FAB */}
+        <button
+          id="mobile-download-fab"
+          onClick={handleDownloadClick}
+          disabled={isPrinting}
+          className="mobile-download-fab"
+        >
+          {isPrinting ? (
+            <>
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span>Preparing…</span>
+            </>
+          ) : (
+            <>
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Download PDF</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          DESKTOP PREVIEW (hidden on mobile)
+      ══════════════════════════════════════════════════════ */}
+      <div className="print-preview-wrapper desktop-preview w-3/5 bg-gray-300 p-12 overflow-y-auto h-screen flex justify-center items-start shadow-inner">
         <div className="sticky top-0 transition-transform duration-300 hover:scale-[1.01]">
           <ResumeTemplate ref={printRef} />
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          MOBILE BOTTOM NAV BAR
+      ══════════════════════════════════════════════════════ */}
+      <div className="no-print mobile-bottom-nav">
+        <button
+          id="mobile-nav-editor"
+          onClick={() => setMobileView('editor')}
+          className={`mobile-nav-btn ${mobileView === 'editor' ? 'mobile-nav-active' : 'mobile-nav-inactive'}`}
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span>Editor</span>
+        </button>
+        <button
+          id="mobile-nav-preview"
+          onClick={() => setMobileView('preview')}
+          className={`mobile-nav-btn ${mobileView === 'preview' ? 'mobile-nav-active' : 'mobile-nav-inactive'}`}
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Preview</span>
+        </button>
       </div>
 
     </div>
