@@ -82,7 +82,7 @@ const ProjectForm = ({ onAuthClick }) => {
                 <AIButton
                   size="sm"
                   value={point}
-                  context="project-point"
+                  context="projectPoint"
                   onReplace={(improved) => handlePointChange(index, pIndex, improved)}
                   onAuthClick={onAuthClick}
                 />

@@ -83,7 +83,7 @@ const ExperienceForm = ({ onAuthClick }) => {
                 <AIButton
                   size="sm"
                   value={point}
-                  context="experience-point"
+                  context="experiencePoint"
                   onReplace={(improved) => handlePointChange(index, pIndex, improved)}
                   onAuthClick={onAuthClick}
                 />

@@ -16,10 +16,10 @@ const PROMPTS = {
     summary:
         'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT add unnecessary content or make the text longer. Return ONLY the corrected text with no preamble:',
 
-    'experience-point':
+    experiencePoint:
         'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT expand or add new achievements. Return ONLY the corrected bullet with no preamble:',
 
-    'project-point':
+    projectPoint:
         'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Do NOT expand or add new details. Return ONLY the corrected bullet with no preamble:',
 
     achievement:
@@ -31,6 +31,7 @@ const PROMPTS = {
     generic:
         'You are an expert resume writer. Fix all grammatical errors, complete any fragmented or incomplete sentences, and strictly keep the word count roughly equal to the original input. Return ONLY the corrected text with no preamble:',
 };
+
 
 // ─── Main hook ───────────────────────────────────────────────────────────────
 /**

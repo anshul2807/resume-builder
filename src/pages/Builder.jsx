@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../config/api';
 
 // ── Form components (Content tab) ────────────────────────────────────────────
 import PersonalInfoForm from '../components/forms/PersonalInfoForm';
@@ -87,25 +88,52 @@ const Builder = () => {
       return;
     }
 
-    // Deduct tokens
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL || 'http://localhost:5001'}/api/ai/deduct-download`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+    // Helper: fetch with timeout
+    const fetchWithTimeout = (url, options, timeoutMs = 15000) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+    };
+
+    // Deduct tokens — retry once on transient failure
+    const MAX_RETRIES = 2;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const res = await fetchWithTimeout(
+          `${BASE_URL}/api/ai/deduct-download`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          15000
+        );
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Failed to deduct tokens.');
+          return;
         }
-      });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || 'Failed to deduct tokens.');
-        return;
+        refreshUsage(); // update token balance context
+        handleDownload(); // trigger actual PDF download
+        return; // success — exit loop
+      } catch (err) {
+        console.error(`[Download] Attempt ${attempt}/${MAX_RETRIES} failed:`, err);
+        if (attempt < MAX_RETRIES) {
+          // Brief pause before retry
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+        // All retries exhausted
+        if (err.name === 'AbortError') {
+          alert('Request timed out. Please check your internet connection and try again.');
+        } else {
+          alert('Network error — could not reach the server. Please try again in a moment.');
+        }
       }
-      refreshUsage(); // update token balance context
-      handleDownload(); // trigger actual PDF download
-    } catch (err) {
-      alert('Network error. Failed to download.');
     }
   };
 
